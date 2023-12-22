@@ -140,6 +140,15 @@ class PlanetGame extends Program {
         return table;
     }
 
+    /* Permet de convertir une liste entière en String séparer par des espaces */
+	String toString(String[] liste){
+		String tmp = "";
+        for(int i = 0; i<length(liste); i++){
+            tmp = tmp + liste[i] + " ";
+        }
+        return tmp;
+	}
+
     /* Permet de créer un tableau de toutes les parties de la base de données */
     String[][] creerTableauCsv(){
         String[][] tab = new String[rowCount(loadCSV(chemin))+1][columnCount(loadCSV(chemin))];
@@ -227,15 +236,6 @@ class PlanetGame extends Program {
         liste[ligneA] = liste[ligneB];
         liste[ligneB] = tmp;
     }
-
-    /* Permet de convertir une liste entière en String séparer par des espaces */
-	String toString(String[] liste){
-		String tmp = "";
-        for(int i = 0; i<length(liste); i++){
-            tmp = tmp + liste[i] + " ";
-        }
-        return tmp;
-	}
 
     /* Permet de trier la liste de toutes les planètes aléatoirement */
     String[] initialiserListe(){
@@ -407,6 +407,9 @@ class PlanetGame extends Program {
             if(x>=0 && x<=3 && y>=0 && y<=3){
                 if(tab[x][y].decouverte==false){
                     ValeurPossible=false;
+                } else {
+                    x = -1;
+                    y = -1;
                 }
             }
         }
@@ -428,11 +431,29 @@ class PlanetGame extends Program {
         return identifiant;
     }
 
+    /* Permet de demander au joueur si il veut continuer à jouer après le niveau 1 */
+    void finNiveau1(){
+        String reponse = "";
+        while(!equals(reponse,"oui") && !equals(reponse,"non")){
+            println("Veux-tu continuer à jouer ? (oui / non)");
+            reponse = readString();
+            if(equals(reponse, "non")){
+                ajouterUtilisateur(identifiantSauvegarde, 2, point_final);
+                println("D'accord ta partie est enregistrée, à plus tard sur Planet Game !");
+                menuAccueil();
+                jeuEnCours=false;
+            } else if (equals(reponse, "oui")){
+                println("Allez continuons !");
+                // niveau(2);
+                jeuEnCours=false;
+            }
+        }
+    }
+
     /* Permet d'afficher et de jouer au niveau 1 */
     void niveau1(){
         jeuEnCours = true;
         int points = 100;
-
         MemoryGame[][] Memory = new MemoryGame[NB_LIGS_MEMORY][NB_COLS_MEMORY];
         initialiser(Memory);
         while(testerDecouverte(Memory) && jeuEnCours){
@@ -459,22 +480,9 @@ class PlanetGame extends Program {
             }
             delay(3000);
         }
+        println("Bravo tu as fini le niveau avec "+ points+" points.");
         point_final+=points;
-        String reponse = "";
-        while(!equals(reponse,"oui") && !equals(reponse,"non")){
-            println("Veux-tu continuer à jouer ? (oui / non)");
-            reponse = readString();
-            if(equals(reponse, "non")){
-                ajouterUtilisateur(identifiantSauvegarde, 1, point_final);
-                println("D'accord ta partie est enregistrée, à plus tard sur Planet Game !");
-                jeuEnCours=false;
-            } else if (equals(reponse, "oui")){
-                println("Allez continuons !");
-                // niveau(2);
-                jeuEnCours=false;
-            }
-        }
-
+        finNiveau1();
     }
 
 // SAUVEGARDE :
