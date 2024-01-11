@@ -5,10 +5,9 @@ class PlanetGame extends Program {
     String identifiantSauvegarde = "";
     final char SL = '\n';
     boolean jeuEnCours = true;
-    final int NB_COLS_MEMORY = 4;
-    final int NB_LIGS_MEMORY = 4;
     int point_final = 0;
     String chemin = "ressources/baseJoueurs.csv";
+    String cheminQuestion = "ressources/questionsNiveau3.csv";
     
     /* Permet d'executer l'ensemble du jeu au démarrage du programme */
     void algorithm(){
@@ -21,7 +20,11 @@ class PlanetGame extends Program {
     String lireTxt(String NomFichier){
         String result = "";
         for(int IDX_LIGNE=0; IDX_LIGNE<rowCount(loadCSV("ressources/"+NomFichier)); IDX_LIGNE++){
-            result += getCell(loadCSV("ressources/"+NomFichier), IDX_LIGNE, 0) + SL; 
+            if(!(IDX_LIGNE==rowCount(loadCSV("ressources/"+NomFichier))-1)){
+                result += getCell(loadCSV("ressources/"+NomFichier), IDX_LIGNE, 0) + SL; 
+            } else {
+                result += getCell(loadCSV("ressources/"+NomFichier), IDX_LIGNE, 0);
+            }
         }
         return result;
     }
@@ -82,12 +85,13 @@ class PlanetGame extends Program {
     void menuReprise(){
         jeuEnCours = true;
         while(jeuEnCours){
-            println(lireTxt("Continuer.txt"));
+            println(lireTxt("Continuer.txt") +SL);
             println("Tu souhaites reprendre une partie ? Entre ton identifiant.");
-            String identifiantPossible = readString();
             boolean identifiantBdd=true;
             while(identifiantBdd || jeuEnCours){
-                if(equals(identifiantPossible, "QUITTER")){
+                String identifiantPossible = changerString(readString());
+                println(identifiantPossible);
+                if(equals(identifiantPossible, "Quitter")){
                     jeuEnCours = false;
                     menuAccueil();
                 }
@@ -97,20 +101,25 @@ class PlanetGame extends Program {
                         point_final = chercherPointJoueur(identifiantPossible);
                         enleverJoueur(identifiantPossible);
                         niveau1();
+                        jeuEnCours=false;
                     }else if(verifierNiveau(identifiantPossible)==2){
                         identifiantSauvegarde=identifiantPossible;
                         point_final = chercherPointJoueur(identifiantPossible);
                         enleverJoueur(identifiantPossible);
-                        // niveau2();
+                        niveau2();
+                        jeuEnCours=false;
                     }else if(verifierNiveau(identifiantPossible)==3){
                         identifiantSauvegarde=identifiantPossible;
                         point_final = chercherPointJoueur(identifiantPossible);
                         enleverJoueur(identifiantPossible);
-                        // niveau3();
+                        niveau3();
+                        jeuEnCours=false;
+                    } else {
+                        println("Cette partie est fini merci de selectionner une partie en cours.");
                     }
+                } else {
+                    println("Merci d'entrer un identifiant d'une partie en cours.");
                 }
-                println("Merci d'entrer un identifiant d'une partie en cours.");
-                identifiantPossible = readString();
             }
         }
     }
@@ -155,7 +164,13 @@ class PlanetGame extends Program {
 
         for(int IDX_LIGNE=0; IDX_LIGNE<rowCount(loadCSV(chemin)); IDX_LIGNE++){
             for(int IDX_COL=0; IDX_COL<columnCount(loadCSV(chemin)); IDX_COL++){
-                tab[IDX_LIGNE][IDX_COL]=getCell(loadCSV(chemin), IDX_LIGNE, IDX_COL);
+                if(equals(getCell(loadCSV(chemin), IDX_LIGNE, 1),"0")){
+                    tab[IDX_LIGNE][0]=getCell(loadCSV(chemin), IDX_LIGNE, 0);
+                    tab[IDX_LIGNE][1]="Jeu Terminé";
+                    tab[IDX_LIGNE][2]=getCell(loadCSV(chemin), IDX_LIGNE, 2);
+                } else {
+                    tab[IDX_LIGNE][IDX_COL]=getCell(loadCSV(chemin), IDX_LIGNE, IDX_COL);
+                }
             }
         }
 
@@ -177,7 +192,6 @@ class PlanetGame extends Program {
             for (int idxLig = 1; idxLig < length(csv, 1) - 2; idxLig = idxLig +1) {
                 if (comparer(getChamps(csv, idxLig,   idxCol),
                             getChamps(csv, idxLig+1, idxCol)) < 0) {
-                    
                     permuterLignes(csv, idxLig, idxLig + 1);
                     permutation = true;
                 }
@@ -196,7 +210,6 @@ class PlanetGame extends Program {
             } else {
                 result=-1;
             }
-        
         return result;
     }
 
@@ -215,20 +228,20 @@ class PlanetGame extends Program {
     void classement(){
         jeuEnCours = true;
         while(jeuEnCours){
-            println(lireTxt("classement.txt"));
+            println(lireTxt("classement.txt")+SL);
             String[][] tab = creerTableauCsv();
             trierSurColonne(tab);
             println(toString(tab));
 
-            String quitter = readString();
-            if(equals(quitter, "QUITTER")){
+            String quitter = changerString(readString());
+            if(equals(quitter, "Quitter")){
                 jeuEnCours = false;
                 menuAccueil();
             }
         }
     }
 
-// NIVEAU 1 DU JEU :
+// NIVEAU 1 :
 
     /* Permet de permutter une ligne d'une liste par une autre */
     void permuterLigne(String[] liste, int ligneA, int ligneB){
@@ -423,10 +436,10 @@ class PlanetGame extends Program {
         String identifiant=",";
         while(verifierIdentifiant(identifiant) || chercherIdentifiant(identifiant) || length(identifiant)>11){
             if(chercherIdentifiant(identifiant)){
-                println("Cet identifiant est déjà utilisé pour une partie merci de choisir un autre.");
+                println("Cet identifiant est déjà utilisé pour une partie merci d'en choisir un autre.");
             }
             println("Choisis un identifiant pour ta partie (sans virgule et moins de 11 caracèteres)");
-            identifiant = readString();
+            identifiant = changerString(readString());
         }
         return identifiant;
     }
@@ -444,7 +457,7 @@ class PlanetGame extends Program {
                 jeuEnCours=false;
             } else if (equals(reponse, "oui")){
                 println("Allez continuons !");
-                // niveau(2);
+                niveau2();
                 jeuEnCours=false;
             }
         }
@@ -454,11 +467,11 @@ class PlanetGame extends Program {
     void niveau1(){
         jeuEnCours = true;
         int points = 100;
-        MemoryGame[][] Memory = new MemoryGame[NB_LIGS_MEMORY][NB_COLS_MEMORY];
+        MemoryGame[][] Memory = new MemoryGame[4][4];
         initialiser(Memory);
         while(testerDecouverte(Memory) && jeuEnCours){
             clearScreen();
-            println(lireTxt("Memory.txt"));
+            println(lireTxt("Memory.txt")+SL);
             println(texte(Memory));
             println("Première carte");
             int[] ValeursA = demandeCarte(Memory);
@@ -579,7 +592,322 @@ class PlanetGame extends Program {
 
 // NIVEAU 2 :
 
+    /* Permet de demander au joueur si il souhaite passer au prochain niveau ou non */
+    void finNiveau2(){
+        String reponse = "";
+        while(!equals(reponse,"oui") && !equals(reponse,"non")){
+            println("Veux-tu continuer à jouer ? (oui / non)");
+            reponse = readString();
+            if(equals(reponse, "non")){
+                ajouterUtilisateur(identifiantSauvegarde, 3, point_final);
+                println("D'accord ta partie est enregistrée, à plus tard sur Planet Game !");
+                menuAccueil();
+                jeuEnCours=false;
+            } else if (equals(reponse, "oui")){
+                println("Allez continuons !");
+                niveau3();
+                jeuEnCours=false;
+            }
+        }
+    }
+
+    /* Permet d'initialier le tableau du niveau 1 avec les planètes aléatoirement */
+    void initialiserSysteme(PlanetPlace[] Systeme){
+        String[] ListePlanete = new String[]{"Mercure","58","Venus","108","Terre","150","Mars","228","Jupiter","778","Saturne","1426","Uranus","2870","Neptune","4498"};
+        int IDX_LISTE = 0;
+        for(int indice=0;indice<length(Systeme); indice++){
+            Systeme[indice]=newPlaneteSysteme(ListePlanete[IDX_LISTE], ListePlanete[IDX_LISTE+1]);
+            IDX_LISTE+=2;
+        }
+    }
+
+    /* Permet de créer une planete avec la valeur mit en paramètre */
+    PlanetPlace newPlaneteSysteme(String plan, String dist){
+        PlanetPlace p = new PlanetPlace();
+        p.decouverte=false;
+        p.planete=plan;
+        p.distance=dist;
+        return p;
+    }
+
+    /* Permet de generer la liste du jeu en chaine de caractères */
+    String texteSysteme(PlanetPlace[] tab){
+		String res = "|''| (_)    >    |``````    "; 
+		for (int indice=0;indice<length(tab);indice++){
+			res = res + " " +(indice+1) + " " + texteSysteme(tab[indice]) + " ";
+		}
+        res+="             |";
+		return res;
+    }
+    
+    /* Retourne la chaîne de caractère prête à être affichée qui correspond à la planète passé en paramètre */
+    String texteSysteme(PlanetPlace p){
+        if(p.decouverte==false){
+			return "~~~~~~~";
+		}else{
+			return p.planete + genererEspace(p.planete, 7);
+		}
+    }
+
+    /* Permet de demander ou veut jouer l'utilisateur */
+    int demandeIndice(PlanetPlace[] tab){
+        String x_String = "";
+        int x = -1;
+        boolean ValeurPossible = true;
+        while(ValeurPossible){
+            while(x<0 || x>9){
+                println("Donne l'indice de la planete choisi entre 1 et 8");
+                x = testerStringToInt(readString())-1;
+            }
+            if(x>=0 && x<=7){
+                if(tab[x].decouverte==false){
+                    ValeurPossible=false;
+                } else {
+                    x = -1;
+                }
+            }
+        }
+        return x;
+    }
+
+    /* Permet d'afficher une planete sur le jeu */
+    void retournerPlanete(PlanetPlace[] tab, int IDX_P){
+        tab[IDX_P].decouverte = true;
+    }
+
+    /* Permet de cacher une planete du jeu */
+    void cacherPlanete(PlanetPlace[] tab, int IDX_P){
+        tab[IDX_P].decouverte = false;
+    }
+
+    /* Permet de faire la fin du tableau du jeu qui s'affiche */
+    String finTableau(){
+        String res="|   \\    \\    / /                      *                                                                                         |"+SL;
+        res+="|    `.   `--'.'                                                            *                        *                     *     |"+SL;
+        res+="|   .' `-,,,-' `.                                                                                                                |"+SL;
+        res+="| .'      :      `.      *                        *                                         *                                    |"+SL;
+        res+="|                                                                                                    *                    *      |"+SL;
+        res+="|                                 *                        *                 *                                                   |"+SL;
+        res+="+================================================================================================================================+"+SL;
+        return res;
+    }
+
+    /* Renvoie si le jeu est fini ou non */
+    boolean testerJeuFini(PlanetPlace[] Systeme){
+        int IDX_L = 0;
+        boolean result = true;
+        while(IDX_L < length(Systeme, 1) && result){
+            if(Systeme[IDX_L].decouverte==false){
+                result = false;
+            }
+            IDX_L += 1;
+        }
+        return !result;
+    }   
+
+    /* Converti les chiffres en miliars ou milion en fonction de la longueur de la distance */
+    String convertir(String distance){
+        String res="";
+        if(length(distance)==4){
+            res+=charAt(distance,0)+","+charAt(distance,0)+" miliards de";
+        } else{
+            res+=distance+" milions de";
+        }
+        return res;
+    }
+
+    /* Permet d'éviter une erreur de l'utilisateur pour avoir mit la bonne planete */
+    String changerString(String chaine){
+        String res="";
+        for(int IDX=0; IDX<length(chaine); IDX++){
+            if(IDX==0 && charAt(chaine,IDX)>=97 && charAt(chaine,IDX)<=122){
+                res+=(char)(charAt(chaine,IDX)-32);
+            }else if(charAt(chaine,IDX)>=65 && charAt(chaine,IDX)<=90 && IDX>0) {
+                res+=(char)(charAt(chaine,IDX)+32);
+            } else{
+                res+=charAt(chaine,IDX);
+            }
+        }
+        return res;
+    }
+
+    /* Permet de lancer le niveau 2 du jeu */
+    void niveau2(){
+        jeuEnCours = true;
+        int points = 0;
+        PlanetPlace[] Systeme = new PlanetPlace[8];
+        initialiserSysteme(Systeme);
+        int chancePossible = 3;
+        while(testerJeuFini(Systeme) && jeuEnCours && chancePossible>0){
+            clearScreen();
+            println(lireTxt("PlanetPlace.txt"));
+            println(texteSysteme(Systeme));
+            println(finTableau());
+            int indice_planete = demandeIndice(Systeme);
+            println("Quel planete proposes tu ?");
+            String planete = changerString(readString());
+            if(equals(Systeme[indice_planete].planete, planete)){
+                clearScreen();
+                retournerPlanete(Systeme, indice_planete);
+                println(lireTxt("PlanetPlace.txt"));
+                println(texteSysteme(Systeme));
+                println(finTableau());
+                println("Bravo tu as trouvé ! Savez tu que "+Systeme[indice_planete].planete+" se situe à "+ convertir(Systeme[indice_planete].distance) +" kilomètres du soleil ?");
+                points+=10;
+                delay(5000);
+            }else{
+                chancePossible-=1;
+                println("Dommage retente ta chance !");
+                delay(2500);
+            }
+        }
+        println(SL + "Bravo tu as fini le niveau avec "+ points+" points.");
+        point_final+=points;
+        finNiveau2();
+    }
+
+
 // NIVEAU 3 :
 
+    /* Permet de vérifier si le joueur à trouver la bonne réponse */
+    boolean verifierReponse(int IDX_COL, int IDX_LIGNE){
+        boolean result = false;
+        if(equals(getCell(loadCSV(cheminQuestion), IDX_LIGNE, IDX_COL), getCell(loadCSV(cheminQuestion), IDX_LIGNE, 5))){
+            result=true;
+        }
+        return result;
+    }
+
+    /* Permet d'initialiser une liste d'élément de la question et les réponses */
+    String[] initialierQuestion(int ligne){
+        if(ligne==1){
+            ligne+=1;
+        }
+        String[] result = new String[6];
+        for(int IDX_COL=0; IDX_COL<6; IDX_COL++){
+            result[IDX_COL] = getCell(loadCSV(cheminQuestion), ligne, IDX_COL);
+        }
+        return result;
+    }
+
+    /* Permet de faire l'affichage des possibles réponses pour l'utilisateur */
+    String afficherReponse(int ligne){
+        String result = "";
+        char[] lettre = new char[]{'A','B','C','D'};
+        for(int IDX_COL=1; IDX_COL<5; IDX_COL++){
+            result += lettre[IDX_COL-1] + ": " + getCell(loadCSV(cheminQuestion), ligne, IDX_COL) + " ";
+        }
+        return result;
+    }
+
+    /* Permet de demander au joueur la réponse qu'il veut */
+    int demandeReponse(){
+        String x_String = "";
+        int x = -1;
+        boolean ValeurPossible = true;
+        while(x<0 || x>4){
+                println("Quel réponse proposes tu ? A B C ou D");
+                x_String = readString();
+                if(length(x_String)==1){
+                    if(equals(x_String,"A")){
+                        x=1;
+                    } else if(equals(x_String,"B")){
+                        x=2;
+                    } else if(equals(x_String,"C")){
+                        x=3;
+                    } else if(equals(x_String,"D")){
+                        x=4;
+                    }
+                }
+        }
+        return x;
+    }
+
+    /* Permet de mettre fin au jeu PlanetGame */
+    void finNiveau3(){
+        String reponse = "";
+        println("Bravo ! Tu as fini le jeu PlanetGame avec "+point_final+" points. Merci d'avoir joué ta partie a été enregistrer.");
+        ajouterUtilisateur(identifiantSauvegarde, 0, point_final);
+        jeuEnCours=false;
+        delay(3000);
+        menuAccueil();
+    }
+
+    /* Permet de lancer le niveau 3 du jeu */
+    void niveau3(){
+        jeuEnCours = true;
+        int points = 0;
+        int chancePossible = 5;
+        int numeroQuestion = 0;
+        while(jeuEnCours && chancePossible>0){
+            numeroQuestion+=1;
+            clearScreen();
+            println(lireTxt("PlanetQuestion.txt"));
+            int ligne_question = (int) (random()*100);
+            String[] question = initialierQuestion(ligne_question);
+            println(SL + "Question "+numeroQuestion+": "+question[0] + SL + afficherReponse(ligne_question) + SL);
+            int reponse = demandeReponse();
+            if(verifierReponse(reponse, ligne_question)){
+                println("Bravo tu as réussi ! Passons à la prochaine question !");
+                points+=5;
+            } else {
+                println("Dommage la bonne réponse était " + question[5]);
+                chancePossible-=1;
+            }
+            delay(3000);
+        }
+        println(SL + "Bravo tu as fini le niveau avec "+ points+" points." + SL);
+        point_final+=points;
+        finNiveau3();
+    }
+
 // FONCTIONS DE TEST :
+
+    void testChangerString(){
+        assertEquals("Mercure",changerString("mercure"));
+        assertEquals("Mercure",changerString("MERCURE"));
+        assertEquals("Mercure",changerString("MerCUre"));
+    }
+
+    void testPointJoueur(){
+        assertEquals(1,chercherPointJoueur("testniveau"));
+    }
+
+    void testNiveau(){
+        assertEquals(0,verifierNiveau("testniveau"));
+    }
+
+    void testChercherIdentifiant(){
+        assertTrue(chercherIdentifiant("Giorgio2"));
+        assertFalse(chercherIdentifiant("Giorgioooooooooooo"));
+    }
+
+    void testIdentifiant(){
+        assertFalse(verifierIdentifiant("Giorgio"));
+        assertTrue(verifierIdentifiant("Gio,rgio"));
+        assertTrue(verifierIdentifiant("QUITTER"));
+    }
+
+    void testStringToInt(){
+        assertEquals(1,testerStringToInt("1"));
+        assertEquals(-1,testerStringToInt("12a"));
+        assertEquals(-1,testerStringToInt(""));
+    }
+
+    void testComparer(){
+        assertEquals(0,comparer("1","1"));
+        assertEquals(1,comparer("2","1"));
+        assertEquals(-1,comparer("1","2"));
+    }
+
+    void testInitialiserListe(){
+        String[] ListePlanete = new String[]{"MERCURE","VENUS", "TERRE", "MARS", "JUPITER", "SATURNE", "URANUS", 
+        "NEPTUNE", "MERCURE", "VENUS", "TERRE", "MARS", "JUPITER", "SATURNE", "URANUS", "NEPTUNE"};
+        String[] nouvelle_Liste = initialiserListe();
+        boolean result = false;
+        if(ListePlanete!=nouvelle_Liste){
+            result=true;
+        }
+        assertTrue(result);
+    }
 }

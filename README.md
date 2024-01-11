@@ -1,10 +1,10 @@
 <Planet Game>
 ===========
 
-Développé par <Giorgio UTZERI> <Noa LANNOY>
-Contacts : <giorgio.utzeri.etu@univ-lille.fr> , <noa.lannoy.etu@univ-lille.fr>
+Développé par Giorgio UTZERI
+Contacts : <gioutzeri@gmail.com>
 
-# Présentation de <Planet Game>
+# Présentation de Planet Game
 
 <Description de votre jeu>
 Le jeu se base sur plusieurs niveau de découverte de l’espace pour l’élève sous forme d’un « memory game ». Il devra alors trouver les positions commune de plusieurs planètes dans un tableau pour le premier niveau. Il devra ensuite au second niveau classer les planètes par rapport à leurs places par rapport au soleil. Le dernier niveau sera alors une suite de questions sur les planètes, l’élève gagne alors si il réussi les 3 niveaux.
@@ -14,7 +14,7 @@ Concernant le 2ème niveau sur l’affichage il sera présenter sur un système 
 Des captures d'écran illustrant le fonctionnement du logiciel sont proposées dans le répertoire shots.
 
 
-# Utilisation de <Planet Game>
+# Utilisation de Planet Game
 
 Afin d'utiliser le projet, il suffit de taper les commandes suivantes dans un terminal :
 
@@ -27,3 +27,5 @@ Permet la compilation des fichiers présents dans 'src' et création des fichier
 ./run.sh
 ```
 Permet le lancement du jeu
+
+Pour une meilleur utilisation du jeu merci de dézommer l'écran de votre terminal de 1 cran pour permettre un bon affichage, merci.
